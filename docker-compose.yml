@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: spire
+      POSTGRES_PASSWORD: spirepass
+      POSTGRES_DB: spire
+    ports:
+      - "5432:5432"
+
+  spire-server:
+    image: ghcr.io/spiffe/spire-server:1.7.0
+    volumes:
+      - ./spire/server:/opt/spire/conf/server
+    command: ["spire-server", "run"]
+    ports:
+      - "8081:8081"
+
+  spire-agent:
+    image: ghcr.io/spiffe/spire-agent:1.7.0
+    depends_on:
+      - spire-server
+    volumes:
+      - ./spire/agent:/opt/spire/conf/agent
+    entrypoint: ["/opt/spire/bin/spire-agent"]
+    command: ["run", "-config", "/opt/spire/conf/agent/agent.conf", "-joinToken", "<join_token>"]
