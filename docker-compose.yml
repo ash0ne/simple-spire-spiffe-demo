@@ -1,5 +1,8 @@
 version: '3.8'
 
+volumes:
+  spire-agent-socket:
+
 services:
 
   postgres:
@@ -20,10 +23,39 @@ services:
       - "8081:8081"
 
   spire-agent:
-    image: ghcr.io/spiffe/spire-agent:1.7.0
+    build: ./spire/agent
     depends_on:
       - spire-server
     volumes:
       - ./spire/agent:/opt/spire/conf/agent
+      - spire-agent-socket:/tmp/spire-agent/public
     entrypoint: ["/opt/spire/bin/spire-agent"]
+    pid: host
     command: ["run", "-config", "/opt/spire/conf/agent/agent.conf", "-joinToken", "<join_token>"]
+
+  workload-server:
+    build: ./workload/server
+    volumes:
+      - spire-agent-socket:/tmp/spire-agent/public:ro
+    environment:
+      - SPIFFE_ENDPOINT_SOCKET=/tmp/spire-agent/public/api.sock
+    depends_on:
+      - spire-agent
+    command: ["./server"]
+    pid: host
+    ports:
+      - "8443:8443"
+
+  workload-client:
+    build: ./workload/client
+    volumes:
+      - spire-agent-socket:/tmp/spire-agent/public
+    environment:
+      - SPIFFE_ENDPOINT_SOCKET=/tmp/spire-agent/public/api.sock
+    depends_on:
+      - workload-server
+      - spire-agent
+    user: "1000:1000"  
+    command: ["./client"]
+
+
