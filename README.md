@@ -22,13 +22,13 @@ Workloads running on those hosts get their own SPIFFE IDs — these identities a
 
 Imagine a system where:
 
-**Trust Domain:** example.org — is your organisation or platform boundary.
-**Host:** is a server running a SPIFFE Agent, attested and registered with the SPIFFE Server.
-**Workloads:** are individual applications or services running on the host, each assigned a SPIFFE ID like:
+- **Trust Domain:** example.org — is your organisation or platform boundary.
+- **Host:** is a server running a SPIFFE Agent, attested and registered with the SPIFFE Server.
+- **Workloads:** are individual applications or services running on the host, each assigned a SPIFFE ID like:
 
-spiffe://example.org/agent1 - For host
-spiffe://example.org/server - For Workload A
-spiffe://example.org/client - For another Workload B that needs to call A
+  - spiffe://example.org/agent1 - For host
+  - spiffe://example.org/server - For Workload A
+  - spiffe://example.org/client - For another Workload B that needs to call A
 
 Here, the workloads’ identities are parented by the host’s(agent's) SPIFFE ID, allowing secure, auditable identity delegation.
 
